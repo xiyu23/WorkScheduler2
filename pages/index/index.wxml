@@ -1,0 +1,45 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="userinfo">
+    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+    <block wx:else>
+      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+    </block>
+  </view>
+  <map longitude='{{longitude}}' latitude='{{latitude}}'></map>
+  
+  <template is="dateCell" data="{{...cellobj}}"/>
+<template is="monthBlock" data="{{...monthData}}"/>
+
+  <view class="usermotto">
+    <text class="user-motto">{{motto}}</text>
+    <button bindtap='clickMe'>Click me!</button>
+  </view>
+  <view>
+    <input placeholder="这个只有在按钮点击的时候才聚焦" focus="{{focus}}" />
+  </view>
+  <view class="section">
+  <view class="section__title">普通选择器</view>
+  <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
+    <view class="picker">
+      当前选择：{{array[index]}}
+    </view>
+  </picker>
+</view>
+</view>
+
+
+<template name="monthBlock">
+  <view class='month-title'>{{month}}</view>
+  <view wx:for='{{status}}' wx:for-item='item' wx:for-index='idx'>
+    <view class='date'>
+      <block wx:if='{{item != null}}'>
+        <text wx:if='{{item.status != ""}}'> {{item.status}} </text>
+        <text> {{item.date}} </text>
+        <text> {{item.traDate}} </text>
+      </block>
+    </view>
+  </view>
+  
+</template>
