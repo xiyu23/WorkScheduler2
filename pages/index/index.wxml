@@ -1,5 +1,5 @@
 <!--index.wxml-->
-<view class="container">
+<view class='body'>
   <view class="userinfo">
     <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
     <block wx:else>
@@ -7,39 +7,70 @@
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
     </block>
   </view>
-  <map longitude='{{longitude}}' latitude='{{latitude}}'></map>
   
-  <template is="dateCell" data="{{...cellobj}}"/>
-<template is="monthBlock" data="{{...monthData}}"/>
-
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
-    <button bindtap='clickMe'>Click me!</button>
-  </view>
-  <view>
-    <input placeholder="这个只有在按钮点击的时候才聚焦" focus="{{focus}}" />
-  </view>
-  <view class="section">
-  <view class="section__title">普通选择器</view>
-  <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
-    <view class="picker">
-      当前选择：{{array[index]}}
+  <view class='calendar'>
+    <view>
+      <text bindtap='jumpToToday' class='jump-today'>今天</text>
     </view>
-  </picker>
+    <view class='calendar-header'>
+      <block wx:for='{{weeks}}'>
+        <view class='week' style='width:{{dateWidth}}px;height:{{dateWidth-10}}px'>{{item}}</view>
+      </block>
+    </view>
+
+    <scroll-view class='calendar-body' scroll-y='true' bindscrolltoupper="upper" bindscrolltolower="lower" scroll-into-view="{{toView}}" scroll-top="{{scrollTop}}">
+      <block wx:for='{{monthMetadata}}' wx:for-item='monthData'>
+        <template is="monthBlock" data="{{...monthData, dw:dateWidth}}"/>
+      </block>
+    </scroll-view>
+  </view>
+
+<!-- 用户负责初始化calendar START -->
+<view>
+  <text>设置轮班周期</text><switch bindchange="setPeriod"/>
 </view>
+<view wx:if='{{switchOn == true}}'>
+  <block wx:if='{{setCalendarStep==1}}'>
+    <text wx:if='{{userInfo.nickName}}'>hi {{userInfo.nickName + (userInfo.gender == 1 ? "小哥哥" : "小姐姐")}}, </text>
+    <text wx:else>hi, </text>
+    <text>现在开始设置轮班周期吧?</text>
+    <button bindtap='startSetting'>好</button>
+  </block>
+  <block wx:else>
+    <view class='picker'>
+      <text class='picker-prompt'>请选择你轮班周期天数:</text>
+      <picker-view class='TPicker' indicator-style="height: 30px;" value="{{[0]}}" bindchange="bindChange">
+          <picker-view-column>
+            <view wx:for="{{periodDays}}" style="line-height: 30px;text-align:center">{{item}}天</view>
+          </picker-view-column>
+      </picker-view>
+    </view>
+    <text>好的, 现在请填写下面每一天的状态:</text>
+      <view wx:for='{{periodDaysChoosen}}'>
+          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:if='{{index == 0}}' maxlength="5" placeholder="今天上什么班?" id='txtPeriod_{{index}}'/>
+          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:elif='{{index == 1}}' maxlength="5" placeholder="明天上什么班?" id='txtPeriod_{{index}}'/>
+          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:elif='{{index == 2}}' maxlength="5" placeholder="后天上什么班?" id='txtPeriod_{{index}}'/>
+          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:else maxlength="5" placeholder="{{index-1}}天后上什么班?"id='txtPeriod_{{index}}' />
+      </view>
+  </block>
+</view>
+<!-- 用户负责初始化calendar END -->
+
 </view>
 
 
 <template name="monthBlock">
-  <view class='month-title'>{{month}}</view>
-  <view wx:for='{{status}}' wx:for-item='item' wx:for-index='idx'>
-    <view class='date'>
-      <block wx:if='{{item != null}}'>
-        <text wx:if='{{item.status != ""}}'> {{item.status}} </text>
-        <text> {{item.date}} </text>
-        <text> {{item.traDate}} </text>
-      </block>
-    </view>
+  <view class='month-block' id='{{"m_" + month}}'>
+    <view class='month-title'>{{month}}</view>
+    <block wx:for='{{status}}' wx:for-item='item' wx:for-index='idx'>
+      <view class='date' style='width:{{dw}}px;height:{{dw+10}}px'>
+        <block wx:if='{{item != null}}'>
+          <text wx:if='{{item.status != ""}}' class='status'> {{item.status}} </text>
+          <text class='day'> {{item.date}} </text>
+          <text class='lunar'> {{item.traDate}} </text>
+        </block>
+      </view>
+    </block>
+    <view class='clear-float' style='clear:both'></view>
   </view>
-  
 </template>
