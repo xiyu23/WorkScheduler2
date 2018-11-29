@@ -1,6 +1,6 @@
 /**index.wxss**/
 .body{
-  margin: 0 10px;
+  margin: 0 10px 50px;
 }
 .userinfo {
   display: flex;
@@ -99,4 +99,21 @@
 }
 .day-status-input{
 
+}
+.switcher{
+  height:32px;
+  margin:10px;
+}
+.switcher text{
+  height:100%;
+  line-height: 32px;
+}
+.switcher switch{
+  float:right;
+}
+.set-content{
+  margin: 10px;
+}
+.status-input-view{
+  
 }

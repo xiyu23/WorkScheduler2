@@ -18,15 +18,9 @@ for (let i = 1; i < 11; i++){
   PERIOD_DAYS.push(i);
 }
 let PERIODS = [];//从localStorage读取用户设置的轮班数据 ['白1', '夜1', ...]
-let hasSetCalender = false;
-if (0 < PERIODS.length){
-  hasSetCalender = true;
-}
-
-let inputPeriodsObj = {};
 let DateWidth = 0;
-
-
+let DAYS_CHOOSEN = 0;
+let inputPeriodsObj = {};
 Page({
   data: {
     userInfo: {},
@@ -37,13 +31,12 @@ Page({
     dateWidth: DateWidth,//小方格的宽度
     monthMetadata:[],
     //scroll-view
-    toView: 'm_2018-11',
+    toView: CURRENT_MONTH_ID,
 
     //初始化calendar数据
     switchOn: false,
     promptText: '',
     setCalendarStep: 1,
-    periodDaysChoosen: [],
     periodDays: PERIOD_DAYS,//picker view天数选择
 
   },
@@ -62,29 +55,39 @@ Page({
     let isOn = e.detail.value;
     if (isOn){
       //TODO如果已经设置过,则将数据填充进去
-      this.setData({ switchOn: true, setCalendarStep: 1, periodDaysChoosen: []}); 
+      //this.setData({ switchOn: true, setCalendarStep: 1, periodDaysChoosen: []}); 
+      this.setData({ switchOn: true, setCalendarStep: 1, dayIndex: 0, daysChoosen: [{ dayNo:0, dayStatusPrompt:'今天上什么班?'}] }); 
     }
     else{
       //关闭switcher,完成设置轮班周期
-      let T = this.data.periodDaysChoosen.length;
-      if (T < 1) {
+      if (DAYS_CHOOSEN < 1) {
         this.setData({switchOn: false});
         return;
       }
 
+      this.setData({ switchOn: false });//关闭设置
+      
       PERIODS = [];
-      for (let i = 0; i < T; i++) {
+      let isEmpty = true;
+      for (let i = 0; i < DAYS_CHOOSEN; i++) {
         if (inputPeriodsObj[i]) {
           PERIODS.push(inputPeriodsObj[i]);
+          isEmpty= false;
         }
         else {
           PERIODS.push('');
         }
       }
-      inputPeriodsObj = {};
-      this.setData({ switchOn: false });//关闭设置
+      inputPeriodsObj = {}; 
+
+      
       console.log(PERIODS);
 
+      if (isEmpty){
+        PERIODS = [];
+        console.log('[info]user didnot set status finished, but all are empty.');
+        return;
+      }
       //对当前日历，刷新每天的状态
       dataGenerator.SetPeriods(PERIODS, NOW);
       let l = this.data.monthMetadata.length;
@@ -109,17 +112,34 @@ Page({
   //输入框输入每天状态
   onInputConfirm: function(e){
     let val = e.detail.value;
-    let id = e.target.id.replace(/^txtPeriod_/, '');//txtPeriod_0
+    let id = e.target.id.replace(/^txtPeriod_/, '');//txtPeriod_0 
     inputPeriodsObj[id] = val;
   },
   //选了一个轮班周期天数
   bindChange: function(e){
-    const val = e.detail.value;
+    DAYS_CHOOSEN = e.detail.value[0]+1;
+    // if (!this.data.dayIndex || DAYS_CHOOSEN - 1 < this.data.dayIndex){
+    //   this.setData({ dayIndex: 0, dayStatusPrompt: '今天上什么班?'});
+    // }
+
     let days = [];
-    for (let i = 0; i < val[0]+1; i++){
-      days.push(i);
+    for (let i = 0; i < DAYS_CHOOSEN; i++){
+      let prompt = i+'天后';
+      if (i == 0){
+        prompt = '今天';
+      }
+      else if (i == 1){
+        prompt = '明天';
+      }
+      else if (i == 2){
+        prompt = '后天';
+      }
+      days.push({ dayNo: i, dayStatusPrompt: prompt+'上什么班?'});
     }
-    this.setData({ periodDaysChoosen: days});
+    this.setData({ daysChoosen: days});
+
+    //console.log('dayIndex'+this.data.dayIndex);
+    console.log('dayChoosen:'+DAYS_CHOOSEN);
   },
   //scroll-view start
   upper: function (e) {

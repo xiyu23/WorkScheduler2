@@ -26,15 +26,15 @@
   </view>
 
 <!-- 用户负责初始化calendar START -->
-<view>
+<view class='switcher'>
   <text>设置轮班周期</text><switch bindchange="setPeriod"/>
 </view>
-<view wx:if='{{switchOn == true}}'>
+<view wx:if='{{switchOn == true}}' class='set-content'>
   <block wx:if='{{setCalendarStep==1}}'>
     <text wx:if='{{userInfo.nickName}}'>hi {{userInfo.nickName + (userInfo.gender == 1 ? "小哥哥" : "小姐姐")}}, </text>
     <text wx:else>hi, </text>
     <text>现在开始设置轮班周期吧?</text>
-    <button bindtap='startSetting'>好</button>
+    <button bindtap='startSetting' type='primary'>好</button>
   </block>
   <block wx:else>
     <view class='picker'>
@@ -46,12 +46,11 @@
       </picker-view>
     </view>
     <text>好的, 现在请填写下面每一天的状态:</text>
-      <view wx:for='{{periodDaysChoosen}}'>
-          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:if='{{index == 0}}' maxlength="5" placeholder="今天上什么班?" id='txtPeriod_{{index}}'/>
-          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:elif='{{index == 1}}' maxlength="5" placeholder="明天上什么班?" id='txtPeriod_{{index}}'/>
-          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:elif='{{index == 2}}' maxlength="5" placeholder="后天上什么班?" id='txtPeriod_{{index}}'/>
-          <input type='text' class='day-status-input'  bindblur='onInputConfirm' wx:else maxlength="5" placeholder="{{index-1}}天后上什么班?"id='txtPeriod_{{index}}' />
+    <view wx:for='{{daysChoosen}}'>
+      <view class='status-input-view' style='border:1px solid orange'>
+          <input type='text' id='txtPeriod_{{index}}' class='day-status-input' confirm-hold='{{daysChoosen.length -1 != index}}' bindblur='onInputConfirm' maxlength="5" placeholder="{{item.dayStatusPrompt}}" />
       </view>
+    </view>
   </block>
 </view>
 <!-- 用户负责初始化calendar END -->
