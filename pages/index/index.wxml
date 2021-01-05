@@ -1,7 +1,7 @@
 <!--index.wxml-->
 <view class='body'>
   <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+    <button wx:if="{{!!hasUserInfo}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
     <block wx:else>
       <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
@@ -30,31 +30,23 @@
   <text>{{switcherPrompt}}</text><switch bindchange="setPeriod"/>
 </view>
 <view wx:if='{{switchOn == true}}' class='set-content'>
-  <block wx:if='{{setCalendarStep==1}}'>
-    <text wx:if='{{userInfo.nickName}}'>hi {{userInfo.nickName}}, </text>
-    <text wx:else>hi, </text>
-    <text>现在开始设置轮班周期吧?</text>
-    <button bindtap='startSetting' type='primary'>好</button>
-  </block>
-  <block wx:else>
-    <view class='picker'>
-      <text class='picker-prompt'>请选择你轮班周期天数:</text>
-      <picker-view class='TPicker' indicator-style="height: 30px;" value="{{[0]}}" bindchange="bindChange">
-          <picker-view-column>
-            <view wx:for="{{periodDays}}" style="line-height: 30px;text-align:center" wx:key='index'>{{item}}天</view>
-          </picker-view-column>
-      </picker-view>
-    </view>
-    <text>好的, 现在请填写下面每一天的状态:</text>
-    <view>
-    <block wx:for='{{daysChoosen}}' wx:key='index'>
-      <view class='status-input-view section'>
-          <input type='text' id='txtPeriod_{{index}}' class='day-status-input' confirm-hold='{{(daysChoosen.length-1) != index ? true : false}}' confirm-type='{{daysChoosen.length -1 == index ? "done" : "next"}}' adjust-position='false' bindblur='onInputBlur' bindconfirm='onInputConfirm' maxlength="5" placeholder="{{item.dayStatusPrompt}}" focus='{{focusIndex == index}}'/>
-      </view>
-    </block>
-      <view class='clear-float'></view>
+  <view class='picker'>
+    <text class='picker-prompt'>请选择你轮班周期天数:</text>
+    <picker-view class='TPicker' indicator-style="height: 30px;" value="{{[0]}}" bindchange="bindChange">
+        <picker-view-column>
+          <view wx:for="{{periodDays}}" style="line-height: 30px;text-align:center" wx:key='index'>{{item}}天</view>
+        </picker-view-column>
+    </picker-view>
+  </view>
+  <text>好的, 现在请填写下面每一天的状态:</text>
+  <view>
+  <block wx:for='{{daysChoosen}}' wx:key='index'>
+    <view class='status-input-view section'>
+        <input type='text' id='txtPeriod_{{index}}' class='day-status-input' confirm-hold='{{(daysChoosen.length-1) != index ? true : false}}' confirm-type='{{daysChoosen.length -1 == index ? "done" : "next"}}' adjust-position='false' bindblur='onInputBlur' bindconfirm='onInputConfirm' maxlength="5" placeholder="{{item.dayStatusPrompt}}" focus='{{focusIndex == index}}'/>
     </view>
   </block>
+    <view class='clear-float'></view>
+  </view>
 </view>
 <!-- 用户负责初始化calendar END -->
 

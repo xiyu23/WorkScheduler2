@@ -1,3 +1,4 @@
+const logger = require('../../utils/log.js');
 
 //index.js
 //获取应用实例
@@ -5,7 +6,7 @@ const app = getApp()
 
 //获取屏幕宽度
 let winWidth = wx.getSystemInfoSync().windowWidth;
-const PREV = 0;
+const PREV = 2;
 const NEXT = 12;
 const MAX_PERIODS = 12;
 let NOW;
@@ -13,8 +14,6 @@ let PREV_MOST_DATE;
 let NEXT_MOST_DATE;
 let CURRENT_MONTH_ID;
 let TODAY_NO;//2018-12-21
-
-RefreshConstants();
 
 let PERIOD_DAYS = [];//工作周期天数，设置为[1,10]供用户自行选择
 for (let i = 1; i <= MAX_PERIODS; i++){
@@ -26,7 +25,19 @@ let periods_obj = ReadUserPeriodsSync();//从localStorage读取用户设置的�
 console.log('cache:', periods_obj);
 
 let PERIODS = Array.isArray(periods_obj['periods']) ? periods_obj['periods'] : [];
-let ANCHOR_DATE = !!periods_obj['date'] ? new Date(periods_obj['date']) : null;
+let ANCHOR_DATE = null;
+if (periods_obj['date']) {
+  // stupid: mp sdk does not support new Date('2021-1-5'), which results in <Date null>
+  // console.warn('valid date: ', periods_obj['date']);
+  // ANCHOR_DATE = new Date('2021-1-5');
+  
+  // TODO: 正则取出2021、1、5
+  const strs = periods_obj['date'].split('-');
+  const y = parseInt(strs[0]);
+  const m = parseInt(strs[1]) - 1;
+  const d = parseInt(strs[2]);
+  ANCHOR_DATE = new Date(y, m, d);
+}
 
 //从local storage读取用户设置的周期
 function ReadUserPeriodsSync(){
@@ -44,7 +55,8 @@ let DateWidth = 0;
 let DAYS_CHOOSEN = 1;
 let inputPeriodsObj = {};
 
-let SPECIAL_DATES = ['春节', '元宵节', '端午节', '七夕', 'bingo!', '中秋节', '重阳节', '除夕', '云:)'];
+let SPECIAL_DATES = ['春节', '元宵节', '端午节', '中秋节', '重阳节', '除夕'];
+let MEANINGFUL_DATES = ['七夕']
 
 let DEBUG = false;
 function log(msg){
@@ -65,8 +77,6 @@ function RefreshConstants(){
 Page({
   data: {
     userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
 
     weeks: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
     dateWidth: DateWidth,//小方格的宽度
@@ -82,7 +92,6 @@ Page({
     switcherPrompt: '打开右侧开关以设置轮班周期',
     switchOn: false,
     promptText: '',
-    setCalendarStep: 1,
     periodDays: PERIOD_DAYS,//picker view天数选择
     focusIndex:-1
   },
@@ -103,8 +112,8 @@ Page({
     let isOn = e.detail.value;
     if (isOn){
       //TODO如果已经设置过,则将数据填充进去
-      //this.setData({ switchOn: true, setCalendarStep: 1, periodDaysChoosen: []}); 
-      this.setData({ switcherPrompt: '完成后请关闭右侧开关以生效' ,switchOn: true, setCalendarStep: 1, dayIndex: 0, daysChoosen: [{ dayNo:0, dayStatusPrompt:'今天上什么班?'}] }); 
+      //this.setData({ switchOn: true, periodDaysChoosen: []}); 
+      this.setData({ switcherPrompt: '完成后请关闭右侧开关以生效' ,switchOn: true, dayIndex: 0, daysChoosen: [{ dayNo:0, dayStatusPrompt:'今天上什么班?'}] }); 
       DAYS_CHOOSEN = 1;
     }
     else{
@@ -187,10 +196,6 @@ Page({
       })
     }
   },
-  //开始设置轮班周期
-  startSetting: function(){
-    this.setData({ setCalendarStep: 2});
-  },
   //输入框输入每天状态
   onInputBlur: function(e){
     let val = e.detail.value;
@@ -227,7 +232,7 @@ Page({
   },
   //scroll-view start
   upper: function (e) {
-    log('uppper triggered...')
+    logger.info('uppper triggered...')
 
     //上滑至顶部，向前加载月份
     let prevMonthData = LoadPreviousMonthData.call(this);
@@ -237,7 +242,7 @@ Page({
       this.setData({monthMetadata:innerArr});
     }
     else{
-      log('[info]scroll-view hits upper, no previous month data found.');
+      logger.info('[info]scroll-view hits upper, no previous month data found.');
     }
   },
   lower: function (e) {
@@ -249,22 +254,20 @@ Page({
       this.setData({ monthMetadata: innerArr });
     }
     else {
-      log('[info]scroll-view hits lower, but no next month data found.');
+      logger.info('[info]scroll-view hits lower, but no next month data found.');
     }
   },
   //scroll-view end
 
   onShow: function(){
-    log('onShow...');
+    logger.info('onShow...');
 
     let now = new Date();
     let dayNO = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();//今日，标志css用
     if (dayNO == TODAY_NO){
-      log('仍是今天，不必重新初始化日历');
+      logger.info('仍是今天，不必重新初始化日历');
       return;
     }
-    
-    log('已是第二天，重新初始化日历...');
 
     //刷新时间
     RefreshConstants();
@@ -274,65 +277,48 @@ Page({
   },
 
   onLoad: function () {
-    log('onload...');
+    logger.info('onload...');
     
     if (app.globalData.userInfo) {
-      log('onload 1');
+      logger.info('onload has userInfo');
       this.setData({
         userInfo: app.globalData.userInfo,
-        hasUserInfo: true
       })
-    } else if (this.data.canIUse){
-      log('onload 2');
+    } else {
+      logger.info('onload has NOT userInfo');
       // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
       // 所以此处加入 callback 以防止这种情况
       app.userInfoReadyCallback = res => {
         this.setData({
           userInfo: res.userInfo,
-          hasUserInfo: true
         });
       }
-    } else {
-      log('onload 3');
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
     }
 
-    let that = this;
-    RefreshCalendar(that);
   },
   getUserInfo: function(e) {
     app.globalData.userInfo = e.detail.userInfo
     this.setData({
       userInfo: e.detail.userInfo,
-      hasUserInfo: true
     })
   }
 })
 
 function RefreshCalendar(that){
-  log('[info]query width...');
+  logger.info('query width...');
   wx.createSelectorQuery().select('.calendar').boundingClientRect(function (rect) {
     DateWidth = Math.floor(rect.width / 7);
-    log('[info]query finished, 小方格的宽度是:' + DateWidth);
-    log('[info]start to init monthMetadata ...');
+    logger.info(`query finished, 小方格的宽度是: ${DateWidth}`);
+    logger.info(`start to init monthMetadata: ${JSON.stringify(that.data.monthMetadata)}`);
     that.setData({ toView: CURRENT_MONTH_ID, dateWidth: DateWidth, todayNo: TODAY_NO });
 
     //初始化calendar数据
     if (PERIODS.length < 1 || !(ANCHOR_DATE instanceof Date)) {
-      log('[info]no cache data found');
+      logger.warn(`[info]no cache data found`);
       //return;
     }
     dataGenerator.SetPeriods(PERIODS, ANCHOR_DATE == null ? NOW : ANCHOR_DATE);
-    let innerArra = that.data.monthMetadata;
+    const innerArra = that.data.monthMetadata;
     innerArra.push(dataGenerator.GetMonthlyStatus(NOW));
     let nextMonthData = LoadNextMonthData.call(that);
     if (nextMonthData != null) {
@@ -340,13 +326,12 @@ function RefreshCalendar(that){
     }
     that.setData({ monthMetadata: innerArra });//:[].push(), why don't work?
   }).exec();
-  log('[info]please wait...');
 }
 
 function LoadPreviousMonthData(){
   let currentOldestMonth = -1;
   if (Array.isArray(this.data.monthMetadata) && this.data.monthMetadata.length < 1){
-    log('[error]LoadPreviousMonthData: calendar is empty for now.');
+    logger.error('[error]LoadPreviousMonthData: calendar is empty for now.');
     return null;
   }
   try{
@@ -367,7 +352,7 @@ function LoadPreviousMonthData(){
     return dataGenerator.GetMonthlyStatus(prevMonth);
   }
   catch(e){
-    log(e);
+    logger.error(e);
     return null;
   }
 }
@@ -375,7 +360,7 @@ function LoadPreviousMonthData(){
 function LoadNextMonthData() {
   let currentFurtherMonth = -1;
   if (Array.isArray(this.data.monthMetadata) && this.data.monthMetadata.length < 1) {
-    log('[error]LoadNextMonthData: calendar is empty for now.');
+    logger.error('[error]LoadNextMonthData: calendar is empty for now.');
     return null;
   }
   try {
@@ -385,14 +370,14 @@ function LoadNextMonthData() {
 
     let nextMonth = new Date(year, month, 1);
     if (IsInValidPeriod(nextMonth)) {
-      log('[info]load next month limited: ' + nextMonth);
+      logger.info('[info]load next month limited: ' + nextMonth);
       return null;
     }
-    log('[info]ready to load next month: ' + nextMonth);
+    logger.info('[info]ready to load next month: ' + nextMonth);
     return dataGenerator.GetMonthlyStatus(nextMonth);
   }
   catch (e) {
-    log(e);
+    logger.error(e);
     return null;
   }
 }
@@ -518,9 +503,9 @@ let dataGenerator = (function () {
       tmp += ")年 ";
       if (cMonth < 1) {
         tmp += "(闰)";
-        tmp += monString.charAt(-cMonth - 1);
+        tmp += monString.charAt((-cMonth - 1) % 12);
       } else {
-        tmp += monString.charAt(cMonth - 1);
+        tmp += monString.charAt((cMonth - 1) % 12);
       }
       tmp += "月";
       tmp += (cDay < 11) ? "初" : (cDay < 20 ? "十" : (cDay == 20 ? '二十' : (cDay < 30 ? "廿" : "三十")));
@@ -554,13 +539,9 @@ let dataGenerator = (function () {
 
       function GetLunarDay(solarYear, solarMonth, solarDay) {
         //solarYear = solarYear<1900?(1900+solarYear):solarYear;
-        if (solarYear < 1980 || solarYear > 2020) {
-          return "";
-        } else {
-          solarMonth = (parseInt(solarMonth) > 0) ? (solarMonth - 1) : 11;
-          e2c(solarYear, solarMonth, solarDay);
-          return GetcDateString();
-        }
+        solarMonth = (parseInt(solarMonth) > 0) ? (solarMonth - 1) : 11;
+        e2c(solarYear, solarMonth, solarDay);
+        return GetcDateString();
       }
     }
 
@@ -746,10 +727,7 @@ let dataGenerator = (function () {
       let date = firstDate.AddDays(i - padBefore);//2018-11-25
       //data for rendering
       let tradate = LUNAR.GetOnlyLunarDay(date);
-      let specialClass = SPECIAL_DATES.indexOf(tradate) < 0 ? '': 'red';
-      if (tradate == '云:)' || tradate == 'bingo!'){
-        specialClass = 'purple';
-      }
+      const specialClass = -1 < SPECIAL_DATES.indexOf(tradate) ? 'red' : (-1 < MEANINGFUL_DATES.indexOf(tradate) ? 'purple' : '');
       monthStatusArr.push({
         date: (i - padBefore + 1),
         traDate: tradate,
