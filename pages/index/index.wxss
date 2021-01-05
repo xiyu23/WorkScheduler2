@@ -5,7 +5,7 @@
 .userinfo {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
 }
 
 .userinfo-avatar {
@@ -24,6 +24,7 @@
   /* border: 1rpx solid orange; */
   display: inline-block;
   text-align: center;
+  line-height: 40px;
 }
 
 .date{
@@ -41,7 +42,11 @@
   top:0px;
   right:0px;
   font-size: 0.8rem;
-  color:red;
+  color:#3584ff;
+  max-width:100%;
+  text-overflow:ellipsis;
+  overflow-x:hidden;
+  white-space:nowrap;
 }
 .date text.day{
   display: inline-block;
@@ -61,6 +66,12 @@
   color:gray;
   font-size:0.8em;
   text-align: center;
+}
+.date text.lunar.red{
+  color:red;
+}
+.date text.lunar.purple{
+  color:purple;
 }
 
 .month-title{
@@ -114,6 +125,30 @@
 .set-content{
   margin: 10px;
 }
+.section{
+  font-size: 12px;
+  padding: 10px 5px;
+  /* border-bottom: dashed 1px #cecece; */
+  width:30%;
+  float:left;
+
+  }
+.section input{border: solid 1px #ccc;padding: 0 5px;background-color: #fff;border-radius: 4px;height: 30px;}
 .status-input-view{
-  
+  /* border:1px solid orange; */
+}
+.clear-float{
+  clear:both;
+}
+.pad-bottom{
+  height:34px;
+}
+.date text.day.today{
+  color:orange;
+  font-weight:bold;
+}
+.jump-today{
+  color:orange;
+  margin-left: 5px;
+  font-weight: bold;
 }

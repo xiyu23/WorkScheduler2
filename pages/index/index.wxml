@@ -13,25 +13,25 @@
       <text bindtap='jumpToToday' class='jump-today'>今天</text>
     </view>
     <view class='calendar-header'>
-      <block wx:for='{{weeks}}'>
+      <block wx:for='{{weeks}}' wx:key='index'>
         <view class='week' style='width:{{dateWidth}}px;height:{{dateWidth-10}}px'>{{item}}</view>
       </block>
     </view>
 
     <scroll-view class='calendar-body' scroll-y='true' bindscrolltoupper="upper" bindscrolltolower="lower" scroll-into-view="{{toView}}" scroll-top="{{scrollTop}}">
-      <block wx:for='{{monthMetadata}}' wx:for-item='monthData'>
-        <template is="monthBlock" data="{{...monthData, dw:dateWidth}}"/>
+      <block wx:for='{{monthMetadata}}' wx:for-item='monthData' wx:key='index'>
+        <template is="monthBlock" data="{{...monthData, dw:dateWidth, td:todayNo}}"/>
       </block>
     </scroll-view>
   </view>
 
 <!-- 用户负责初始化calendar START -->
 <view class='switcher'>
-  <text>设置轮班周期</text><switch bindchange="setPeriod"/>
+  <text>{{switcherPrompt}}</text><switch bindchange="setPeriod"/>
 </view>
 <view wx:if='{{switchOn == true}}' class='set-content'>
   <block wx:if='{{setCalendarStep==1}}'>
-    <text wx:if='{{userInfo.nickName}}'>hi {{userInfo.nickName + (userInfo.gender == 1 ? "小哥哥" : "小姐姐")}}, </text>
+    <text wx:if='{{userInfo.nickName}}'>hi {{userInfo.nickName}}, </text>
     <text wx:else>hi, </text>
     <text>现在开始设置轮班周期吧?</text>
     <button bindtap='startSetting' type='primary'>好</button>
@@ -41,35 +41,40 @@
       <text class='picker-prompt'>请选择你轮班周期天数:</text>
       <picker-view class='TPicker' indicator-style="height: 30px;" value="{{[0]}}" bindchange="bindChange">
           <picker-view-column>
-            <view wx:for="{{periodDays}}" style="line-height: 30px;text-align:center">{{item}}天</view>
+            <view wx:for="{{periodDays}}" style="line-height: 30px;text-align:center" wx:key='index'>{{item}}天</view>
           </picker-view-column>
       </picker-view>
     </view>
     <text>好的, 现在请填写下面每一天的状态:</text>
-    <view wx:for='{{daysChoosen}}'>
-      <view class='status-input-view' style='border:1px solid orange'>
-          <input type='text' id='txtPeriod_{{index}}' class='day-status-input' confirm-hold='{{daysChoosen.length -1 != index}}' bindblur='onInputConfirm' maxlength="5" placeholder="{{item.dayStatusPrompt}}" />
+    <view>
+    <block wx:for='{{daysChoosen}}' wx:key='index'>
+      <view class='status-input-view section'>
+          <input type='text' id='txtPeriod_{{index}}' class='day-status-input' confirm-hold='{{(daysChoosen.length-1) != index ? true : false}}' confirm-type='{{daysChoosen.length -1 == index ? "done" : "next"}}' adjust-position='false' bindblur='onInputBlur' bindconfirm='onInputConfirm' maxlength="5" placeholder="{{item.dayStatusPrompt}}" focus='{{focusIndex == index}}'/>
       </view>
+    </block>
+      <view class='clear-float'></view>
     </view>
   </block>
 </view>
 <!-- 用户负责初始化calendar END -->
 
+<!-- 页面底部安全距离 -->
+  <view class='pad-bottom'></view>
 </view>
 
 
 <template name="monthBlock">
   <view class='month-block' id='{{"m_" + month}}'>
     <view class='month-title'>{{month}}</view>
-    <block wx:for='{{status}}' wx:for-item='item' wx:for-index='idx'>
+    <block wx:for='{{status}}' wx:for-item='item' wx:for-index='idx' wx:key='index'>
       <view class='date' style='width:{{dw}}px;height:{{dw+10}}px'>
         <block wx:if='{{item != null}}'>
           <text wx:if='{{item.status != ""}}' class='status'> {{item.status}} </text>
-          <text class='day'> {{item.date}} </text>
-          <text class='lunar'> {{item.traDate}} </text>
+          <text class='{{(td == (month+"-"+item.date))?"today day":"day"}}'> {{item.date}} </text>
+          <text class='lunar {{item.specialclass}}'> {{item.traDate}} </text>
         </block>
       </view>
     </block>
-    <view class='clear-float' style='clear:both'></view>
+    <view class='clear-float'></view>
   </view>
 </template>
