@@ -2,17 +2,19 @@ const log = wx.getRealtimeLogManager ? wx.getRealtimeLogManager() : null
 
 module.exports = {
   info() {
+    console.info(...arguments);
     if (!log) return
+
     log.info.apply(log, arguments)
   },
   warn() {
-    console.warn(arguments);
+    console.warn(...arguments);
     if (!log) return
 
     log.warn.apply(log, arguments)
   },
   error() {
-    console.error(arguments);
+    console.error(...arguments);
     if (!log) return
 
     log.error.apply(log, arguments)

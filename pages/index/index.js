@@ -3,6 +3,7 @@ const logger = require('../../utils/log.js');
 //index.js
 //获取应用实例
 const app = getApp()
+const __DEV__ = true;
 
 //获取屏幕宽度
 let winWidth = wx.getSystemInfoSync().windowWidth;
@@ -16,7 +17,7 @@ let CURRENT_MONTH_ID;
 let TODAY_NO;//2018-12-21
 
 let PERIOD_DAYS = [];//工作周期天数，设置为[1,10]供用户自行选择
-for (let i = 1; i <= MAX_PERIODS; i++){
+for (let i = 1; i <= MAX_PERIODS; i++) {
   PERIOD_DAYS.push(i);
 }
 
@@ -30,7 +31,7 @@ if (periods_obj['date']) {
   // stupid: mp sdk does not support new Date('2021-1-5'), which results in <Date null>
   // console.warn('valid date: ', periods_obj['date']);
   // ANCHOR_DATE = new Date('2021-1-5');
-  
+
   // TODO: 正则取出2021、1、5
   const strs = periods_obj['date'].split('-');
   const y = parseInt(strs[0]);
@@ -40,13 +41,13 @@ if (periods_obj['date']) {
 }
 
 //从local storage读取用户设置的周期
-function ReadUserPeriodsSync(){
+function ReadUserPeriodsSync() {
   let value = {};
   try {
     value = wx.getStorageSync('user_periods')
   } catch (e) {
     console.warn('cannot get user_periods from localstorage')
-    value = {date: '', periods:[]};
+    value = { date: '', periods: [] };
   }
   return value;
 }
@@ -58,14 +59,13 @@ let inputPeriodsObj = {};
 let SPECIAL_DATES = ['春节', '元宵节', '端午节', '中秋节', '重阳节', '除夕'];
 let MEANINGFUL_DATES = ['七夕']
 
-let DEBUG = false;
-function log(msg){
-  if (DEBUG){
+function log(msg) {
+  if (__DEV__) {
     console.log(msg);
   }
 }
 
-function RefreshConstants(){
+function RefreshConstants() {
   NOW = new Date();
   let year = NOW.getFullYear(), month = NOW.getMonth(), date = NOW.getDate();
   PREV_MOST_DATE = new Date(year, month - PREV, 1);//能往前看几个月的日历: 2018-11-1 (PREV==1)
@@ -80,8 +80,8 @@ Page({
 
     weeks: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
     dateWidth: DateWidth,//小方格的宽度
-    monthMetadata:[],
-    
+    monthMetadata: [],
+
     //为标志今天css
     todayNo: TODAY_NO,
 
@@ -93,31 +93,31 @@ Page({
     switchOn: false,
     promptText: '',
     periodDays: PERIOD_DAYS,//picker view天数选择
-    focusIndex:-1
+    focusIndex: -1
   },
   //事件处理函数
-  bindViewTap: function() {
-    if (DEBUG){
+  bindViewTap: function () {
+    if (__DEV__) {
       wx.navigateTo({
         url: '../logs/logs'
       })
     }
   },
   //日历跳转至今天
-  jumpToToday: function(){
-    this.setData({ toView: CURRENT_MONTH_ID});
+  jumpToToday: function () {
+    this.setData({ toView: CURRENT_MONTH_ID });
   },
   //设置轮班周期
-  setPeriod: function(e){
+  setPeriod: function (e) {
     let isOn = e.detail.value;
-    if (isOn){
+    if (isOn) {
       //TODO如果已经设置过,则将数据填充进去
       //this.setData({ switchOn: true, periodDaysChoosen: []}); 
-      this.setData({ switcherPrompt: '完成后请关闭右侧开关以生效' ,switchOn: true, dayIndex: 0, daysChoosen: [{ dayNo:0, dayStatusPrompt:'今天上什么班?'}] }); 
+      this.setData({ switcherPrompt: '完成后请关闭右侧开关以生效', switchOn: true, dayIndex: 0, daysChoosen: [{ dayNo: 0, dayStatusPrompt: '今天上什么班?' }] });
       DAYS_CHOOSEN = 1;
     }
-    else{
-      this.setData({ switcherPrompt:'打开右侧开关以设置轮班周期'})
+    else {
+      this.setData({ switcherPrompt: '打开右侧开关以设置轮班周期' })
       //关闭switcher,完成设置轮班周期
       this.setData({ switchOn: false });//关闭设置
 
@@ -132,18 +132,18 @@ Page({
       for (let i = 0; i < DAYS_CHOOSEN; i++) {
         if (inputPeriodsObj[i]) {
           setPERIODS.push(inputPeriodsObj[i]);
-          isEmpty= false;
+          isEmpty = false;
         }
         else {
           setPERIODS.push('');
         }
       }
-      inputPeriodsObj = {}; 
+      inputPeriodsObj = {};
 
-      
+
       log(setPERIODS);
 
-      if (isEmpty){
+      if (isEmpty) {
         log('[info]user set day status finished, but all are empty.');
         return;
       }
@@ -161,12 +161,12 @@ Page({
       let that = this;
       wx.setStorage({
         key: "user_periods",
-        data: {date:TODAY_NO, periods:PERIODS},
-        success: function(){
+        data: { date: TODAY_NO, periods: PERIODS },
+        success: function () {
 
           log('当前最早日期: ')
           log(that.data.monthMetadata[0])
-          
+
           let oldestDate = new Date(+that.data.monthMetadata[0].month.substr(0, 4), that.data.monthMetadata[0].month.substr(5) - 1);
           log(oldestDate)
           let newMonthData = [];
@@ -177,7 +177,7 @@ Page({
 
           log(newMonthData)
 
-          that.setData({ monthMetadata: newMonthData }, function(){
+          that.setData({ monthMetadata: newMonthData }, function () {
             log('setData completed');
             wx.showToast({
               title: '设置成功!',
@@ -186,7 +186,7 @@ Page({
             })
           });//:[].push(), why don't work?
         },
-        fail:function(){
+        fail: function () {
           wx.showToast({
             title: '写入缓存失败!',
             icon: 'error',
@@ -197,38 +197,38 @@ Page({
     }
   },
   //输入框输入每天状态
-  onInputBlur: function(e){
+  onInputBlur: function (e) {
     let val = e.detail.value;
     let id = e.target.id.replace(/^txtPeriod_/, '');//txtPeriod_0 
     inputPeriodsObj[id] = val;
   },
 
   //点击键盘右下角的响应
-  onInputConfirm:function(e){
+  onInputConfirm: function (e) {
     let id = parseInt(e.target.id.replace(/^txtPeriod_/, ''));
     let hasNext = DAYS_CHOOSEN - 1 != id;
-    if (hasNext){
-      this.setData({ focusIndex:id+1});
+    if (hasNext) {
+      this.setData({ focusIndex: id + 1 });
     }
   },
   //选了一个轮班周期天数
-  bindChange: function(e){
-    DAYS_CHOOSEN = e.detail.value[0]+1;
+  bindChange: function (e) {
+    DAYS_CHOOSEN = e.detail.value[0] + 1;
     let days = [];
-    for (let i = 0; i < DAYS_CHOOSEN; i++){
-      let prompt = i+'天后';
-      if (i == 0){
+    for (let i = 0; i < DAYS_CHOOSEN; i++) {
+      let prompt = i + '天后';
+      if (i == 0) {
         prompt = '今天';
       }
-      else if (i == 1){
+      else if (i == 1) {
         prompt = '明天';
       }
-      else if (i == 2){
+      else if (i == 2) {
         prompt = '后天';
       }
-      days.push({ dayNo: i, dayStatusPrompt: prompt+'上什么班?'});
+      days.push({ dayNo: i, dayStatusPrompt: prompt + '上什么班?' });
     }
-    this.setData({ daysChoosen: days});
+    this.setData({ daysChoosen: days });
   },
   //scroll-view start
   upper: function (e) {
@@ -236,12 +236,12 @@ Page({
 
     //上滑至顶部，向前加载月份
     let prevMonthData = LoadPreviousMonthData.call(this);
-    if (prevMonthData != null){
+    if (prevMonthData != null) {
       let innerArr = this.data.monthMetadata;
       innerArr.unshift(prevMonthData);
-      this.setData({monthMetadata:innerArr});
+      this.setData({ monthMetadata: innerArr });
     }
-    else{
+    else {
       logger.info('[info]scroll-view hits upper, no previous month data found.');
     }
   },
@@ -259,12 +259,12 @@ Page({
   },
   //scroll-view end
 
-  onShow: function(){
+  onShow: function () {
     logger.info('onShow...');
 
     let now = new Date();
     let dayNO = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();//今日，标志css用
-    if (dayNO == TODAY_NO){
+    if (dayNO == TODAY_NO) {
       logger.info('仍是今天，不必重新初始化日历');
       return;
     }
@@ -278,7 +278,7 @@ Page({
 
   onLoad: function () {
     logger.info('onload...');
-    
+
     if (app.globalData.userInfo) {
       logger.info('onload has userInfo');
       this.setData({
@@ -296,7 +296,7 @@ Page({
     }
 
   },
-  getUserInfo: function(e) {
+  getUserInfo: function (e) {
     app.globalData.userInfo = e.detail.userInfo
     this.setData({
       userInfo: e.detail.userInfo,
@@ -304,7 +304,7 @@ Page({
   }
 })
 
-function RefreshCalendar(that){
+function RefreshCalendar(that) {
   logger.info('query width...');
   wx.createSelectorQuery().select('.calendar').boundingClientRect(function (rect) {
     DateWidth = Math.floor(rect.width / 7);
@@ -328,30 +328,30 @@ function RefreshCalendar(that){
   }).exec();
 }
 
-function LoadPreviousMonthData(){
+function LoadPreviousMonthData() {
   let currentOldestMonth = -1;
-  if (Array.isArray(this.data.monthMetadata) && this.data.monthMetadata.length < 1){
+  if (Array.isArray(this.data.monthMetadata) && this.data.monthMetadata.length < 1) {
     logger.error('[error]LoadPreviousMonthData: calendar is empty for now.');
     return null;
   }
-  try{
+  try {
     log(this.data.monthMetadata[0])
 
     currentOldestMonth = this.data.monthMetadata[0].month;//2018-11
     let year = parseInt(currentOldestMonth.substr(0, 4)),
-       month = parseInt(currentOldestMonth.substr(5));
-    
+      month = parseInt(currentOldestMonth.substr(5));
+
     log('current oldest year=' + year + ',month=' + month)
 
-    let prevMonth = new Date(year, month-2, 1);
-    if (IsInValidPeriod(prevMonth)){
+    let prevMonth = new Date(year, month - 2, 1);
+    if (IsInValidPeriod(prevMonth)) {
       log('[info]load previous month limited: ' + prevMonth);
       return null;
     }
     log('[info]ready to load previous month: ' + prevMonth);
     return dataGenerator.GetMonthlyStatus(prevMonth);
   }
-  catch(e){
+  catch (e) {
     logger.error(e);
     return null;
   }
@@ -364,7 +364,7 @@ function LoadNextMonthData() {
     return null;
   }
   try {
-    currentFurtherMonth = this.data.monthMetadata[this.data.monthMetadata.length-1].month;//2018-11
+    currentFurtherMonth = this.data.monthMetadata[this.data.monthMetadata.length - 1].month;//2018-11
     let year = parseInt(currentFurtherMonth.substr(0, 4)),
       month = parseInt(currentFurtherMonth.substr(5));
 
@@ -382,7 +382,7 @@ function LoadNextMonthData() {
   }
 }
 //限制为日历滚动月份: [-1, +12]
-function IsInValidPeriod(date){
+function IsInValidPeriod(date) {
   return date < PREV_MOST_DATE || NEXT_MOST_DATE < date;
 }
 
@@ -397,7 +397,7 @@ let dataGenerator = (function () {
   //import * as LUNA from "./lunar.js";
   let LUNAR = (function () {
     function log(msg) {
-      log(msg);
+      console.log(msg);
     }
 
     function GetFestival(calendar) {
@@ -546,76 +546,297 @@ let dataGenerator = (function () {
     }
 
     //根据阳历日期，获取农历日子，仅返回初一~三十（初一则显示月份）
-    function GetOnlyLunarDay(date) {
-      let lunar = GetLunarDay(date);
-      if (!lunar) {
-        return lunar;
-      }
+    // 如果是春节，返回 { tradate: '正月初一', festival: '春节' }
+    // 如果是普通节日，返回 { tradate: '八月初八', festival: '' }
+    function GetOnlyLunarDay(lunar) {
       //lunar=辛未(羊)年 八月初八
       lunar = lunar.replace(/^.*?\s(.*)$/, '$1');//八月初八
       let lunarDay = lunar.replace(/^.*?(.{2})$/, '$1');
       let lunarMonth = lunar.replace(/^(.*?)(.{2})$/, '$1');
-      if (lunarMonth == '正月'){
+      let festival = '';
+      let tradate = `${lunarMonth}${lunarDay}`;
+      if (lunarMonth == '正月') {
         switch (lunarDay) {
-          case '初一': lunarMonth = '春节'; break;
-          case '十五': lunarDay = '元宵节'; break;
+          case '初一': {
+            festival = '春节';
+            break;
+          }
+          case '十五': {
+            festival = '元宵节';
+            break;
+          }
         }
       }
-      else if (lunarMonth == '腊月'){
-        switch(lunarDay){
-          case '三十': lunarDay = '除夕';break;
-        }
-      }
-      else if (lunarMonth == '五月'){
+      else if (lunarMonth == '腊月') {
         switch (lunarDay) {
-          case '初五': lunarDay = '端午节'; break;
+          case '三十': {
+            festival = '除夕';
+            break;
+          }
         }
       }
-      else if (lunarMonth == '七月'){
-        switch(lunarDay){
-          case '初七': lunarDay = '七夕'; break;
+      else if (lunarMonth == '五月') {
+        switch (lunarDay) {
+          case '初五': {
+            festival = '端午节';
+            break;
+          }
+        }
+      }
+      else if (lunarMonth == '七月') {
+        switch (lunarDay) {
+          case '初七': {
+            festival = '七夕';
+            break;
+          }
           //case '初七': lunarDay = '云:)'; break;
         }
       }
       else if (lunarMonth == '八月') {
         switch (lunarDay) {
+          case '十五': {
+            festival = '中秋节';
+            break;
+          }
           //case '初八': lunarDay = 'bingo!'; break;
-          case '十五': lunarDay = '中秋节'; break;
         }
       }
-      else if (lunarMonth == '九月'){
+      else if (lunarMonth == '九月') {
         switch (lunarDay) {
-          case '初九': lunarDay = '重阳节'; break;
+          case '初九': {
+            festival = '重阳节';
+            break;
+          }
         }
       }
 
-      return lunarDay == "初一" ? lunarMonth : lunarDay;
+      return {
+        tradate,
+        festival,
+      }
+    }
+
+    if (__DEV__) {
+      //test cases
+      const solarDays = [
+        {
+          solar: '1989-05-18',
+          expectLunarDay: '己巳(蛇)年 四月十四',
+        },
+        {
+          solar: '1990-03-21',
+          expectLunarDay: '庚午(马)年 二月廿五',
+        },
+        {
+          solar: '1991-09-15',
+          expectLunarDay: '辛未(羊)年 八月初八',
+        },
+        {
+          solar: '1990-10-26',
+          expectLunarDay: '庚午(马)年 九月初九',
+        },
+        {
+          solar: '1990-11-26',
+          expectLunarDay: '庚午(马)年 十月初十',
+        },
+        {
+          solar: '1993-11-11',
+          expectLunarDay: '癸酉(鸡)年 九月廿八',
+        },
+        {
+          solar: '2019-05-01',
+          expectLunarDay: '己亥(猪)年 三月廿七',
+        },
+        {
+          solar: '2019-05-04',
+          expectLunarDay: '己亥(猪)年 三月三十',
+        },
+        {
+          solar: '2019-05-24',
+          expectLunarDay: '己亥(猪)年 四月二十',
+        },
+        {
+          solar: '2019-06-07',
+          expectLunarDay: '己亥(猪)年 五月初五',
+          festival: '端午节',
+        },
+        {
+          solar: '2019-08-07',
+          expectLunarDay: '己亥(猪)年 七月初七',
+          festival: '七夕',
+        },
+        {
+          solar: '2019-09-13',
+          expectLunarDay: '己亥(猪)年 八月十五',
+          festival: '中秋节',
+        },
+        {
+          solar: '2020-01-01',
+          expectLunarDay: '己亥(猪)年 腊月初七',
+          festival: '元旦',
+        },
+        {
+          solar: '2020-01-24',
+          expectLunarDay: '己亥(猪)年 腊月三十',
+          festival: '除夕',
+        },
+        {
+          solar: '2020-01-25',
+          expectLunarDay: '庚子(鼠)年 正月初一',
+          festival: '春节',
+        },
+        {
+          solar: '2020-06-25',
+          expectLunarDay: '庚子(鼠)年 五月初五',
+          festival: '端午节',
+        },
+        {
+          solar: '2020-10-01',
+          expectLunarDay: '庚子(鼠)年 八月十五',
+          festival: '中秋节', // TODO 重合节日
+        },
+        {
+          solar: '2021-01-01',
+          expectLunarDay: '庚子(鼠)年 十一月十八',
+          festival: '元旦',
+        },
+        {
+          solar: '2021-02-11',
+          expectLunarDay: '庚子(鼠)年 腊月三十',
+          festival: '除夕',
+        },
+        {
+          solar: '2021-02-12',
+          expectLunarDay: '辛丑(牛)年 正月初一',
+          festival: '春节',
+        },
+        {
+          solar: '2021-05-01',
+          expectLunarDay: '辛丑(牛)年 三月二十',
+          festival: '劳动节',
+        },
+        {
+          solar: '2021-06-14',
+          expectLunarDay: '辛丑(牛)年 五月初五',
+          festival: '端午节',
+        },
+        {
+          solar: '2021-08-14',
+          expectLunarDay: '辛丑(牛)年 七月初七',
+          festival: '七夕',
+        },
+        {
+          solar: '2021-09-14',
+          expectLunarDay: '辛丑(牛)年 八月初八',
+        },
+        {
+          solar: '2021-09-21',
+          expectLunarDay: '辛丑(牛)年 五月初五',
+          festival: '中秋节',
+        },
+        {
+          solar: '2021-11-02',
+          expectLunarDay: '辛丑(牛)年 九月廿八',
+        },
+        {
+          solar: '2021-11-11',
+          expectLunarDay: '辛丑(牛)年 十月初七',
+        },
+        {
+          solar: '2022-01-01',
+          expectLunarDay: '辛丑(牛)年 十一月廿九',
+        },
+        {
+          solar: '2022-01-31',
+          expectLunarDay: '辛丑(牛)年 腊月廿九',
+          festival: '除夕',
+        },
+        {
+          solar: '2022-02-01',
+          expectLunarDay: '壬寅(虎)年 正月初一',
+          festival: '春节',
+        },
+        {
+          solar: '2022-04-05',
+          expectLunarDay: '壬寅(虎)年 三月初五',
+          festival: '清明节',
+        },
+        {
+          solar: '2022-05-01',
+          expectLunarDay: '壬寅(虎)年 四月初一',
+          festival: '劳动节',
+        },
+        {
+          solar: '2022-06-03',
+          expectLunarDay: '壬寅(虎)年 五月初五',
+          festival: '端午节',
+        },
+        {
+          solar: '2022-08-04',
+          expectLunarDay: '壬寅(虎)年 七月初七',
+          festival: '七夕',
+        },
+      ];
+
+      const total = solarDays.length;
+      let failedCount = 0;
+      for (let i = 0; i < total; i++) {
+        const {
+          solar,
+          expectLunarDay,
+          festival = '',
+        } = solarDays[i];
+        const fullLunarDay = GetLunarDay(solar);
+        const {
+          festival: resFestival = '',
+        } = GetOnlyLunarDay(fullLunarDay);
+        if (fullLunarDay === expectLunarDay && festival === resFestival) {
+          continue;
+        }
+
+        failedCount++;
+        const isLunarDayCorrect = fullLunarDay === expectLunarDay;
+        const isFestivalCorrect = festival === resFestival;
+        if (!isLunarDayCorrect) {
+          logger.warn(`lunar day is wrong: ${fullLunarDay} !== ${expectLunarDay}`);
+        }
+        if (!isFestivalCorrect) {
+          logger.warn(`festival is wrong: ${festival} !== ${resFestival}`);
+        }
+        logger.error(`case ${i}/${total} failed.
+          solarDay: ${solar}
+          expectedLunarDay: ${expectLunarDay} (got ${fullLunarDay})
+          expectedFestival: ${festival} (got ${resFestival})
+        `);
+      }
+
+      if (0 < failedCount) {
+        logger.error(`Lunar Calculation Cases Failed, only passed: ${total - failedCount} of ${total}`);
+      } else {
+        logger.info(`All lunar calculation cases(${total}) passed!`);
+      }
+      // log(GetLunarDay('2018-11-25'));
+      // log(GetLunarDay('1990-05-27'));
+      // log(GetLunarDay('2020-01-25'));
+
+      // log(GetFestival('1991-09-15'));
+      // log(GetFestival('2018-11-25'));
+      // log(GetFestival('1990-05-27'));
+      // log(GetFestival('1990-10-01'));
+      // log(GetFestival('2018-01-01'));
+
+      // log(GetOnlyLunarDay('1989-05-18'));
+      // log(GetOnlyLunarDay('1991-09-15'));
+      // log(GetOnlyLunarDay('2018-11-25'));
+      // log(GetOnlyLunarDay('1990-05-27'));
+      // log(GetOnlyLunarDay('2020-01-25'));
+      //test cases
     }
 
     //not worked... why!!! after awhile searching, frustrated!!
     //export {GetLunarDay, GetFestival, GetOnlyLunarDay};
     return { GetLunarDay: GetLunarDay, GetFestival: GetFestival, GetOnlyLunarDay: GetOnlyLunarDay };
-    //test cases
-    /*
-    log(GetLunarDay('1989-05-18'));
-    log(GetLunarDay('1991-09-15'));
-    log(GetLunarDay('2018-11-25'));
-    log(GetLunarDay('1990-05-27'));
-    log(GetLunarDay('2020-01-25'));
 
-    log(GetFestival('1991-09-15'));
-    log(GetFestival('2018-11-25'));
-    log(GetFestival('1990-05-27'));
-    log(GetFestival('1990-10-01'));
-    log(GetFestival('2018-01-01'));
-
-    log(GetOnlyLunarDay('1989-05-18'));
-    log(GetOnlyLunarDay('1991-09-15'));
-    log(GetOnlyLunarDay('2018-11-25'));
-    log(GetOnlyLunarDay('1990-05-27'));
-    log(GetOnlyLunarDay('2020-01-25'));
-    */
-    //test cases
 
   })();
 
@@ -628,9 +849,9 @@ let dataGenerator = (function () {
   let periods =
 
     //['早', '中', '晚', '休', '休'],
-    ['白1', '夜1', '下夜1', '白2', '夜2', '休','休','休'],
+    ['白1', '夜1', '下夜1', '白2', '夜2', '休', '休', '休'],
     refPoint = {
-      date:'2018-11-25', statusIndex: 2
+      date: '2018-11-25', statusIndex: 2
     };
   //轮班周期
   let T = periods.length;
@@ -726,8 +947,12 @@ let dataGenerator = (function () {
 
       let date = firstDate.AddDays(i - padBefore);//2018-11-25
       //data for rendering
-      let tradate = LUNAR.GetOnlyLunarDay(date);
-      const specialClass = -1 < SPECIAL_DATES.indexOf(tradate) ? 'red' : (-1 < MEANINGFUL_DATES.indexOf(tradate) ? 'purple' : '');
+      const fullLunarDay = LUNAR.GetLunarDay(date);
+      const {
+        tradate,
+        festival = '',
+      } = LUNAR.GetOnlyLunarDay(fullLunarDay);
+      const specialClass = -1 < SPECIAL_DATES.indexOf(festival) ? 'red' : (-1 < MEANINGFUL_DATES.indexOf(festival) ? 'purple' : '');
       monthStatusArr.push({
         date: (i - padBefore + 1),
         traDate: tradate,
@@ -781,7 +1006,7 @@ let dataGenerator = (function () {
   //设置轮班状态
   //p = ['白',...]
   //date = date object
-  function SetPeriods(p, date){
+  function SetPeriods(p, date) {
     periods = p;
     T = p.length;
     refPoint.date = date.ToStringFormat();
