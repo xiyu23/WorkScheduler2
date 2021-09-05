@@ -139,12 +139,35 @@ var Lunar = {
   //@param l_month 阴历正月对应的阳历月份
   //@param l_day   阴历初一对应的阳历天
   betweenSolarDays: function (year, month, day, l_month, l_day) {
-    var time1 = new Date(year + "-" + month + "-" + day + " 00:00:00").getTime(),
-      time2 = new Date(year + "-" + l_month + "-" + l_day + " 00:00:00").getTime();
-    const interval = Math.ceil((time1 - time2) / 86400000);
+    // var time1 = new Date(year + "-" + month + "-" + day + " 00:00:00").getTime(),
+    //   time2 = new Date(year + "-" + l_month + "-" + l_day + " 00:00:00").getTime();
+    // stupid mp !!!
+    var time1 = new Date();
+    time1.setYear(year);
+    time1.setMonth(month - 1);
+    time1.setDate(day);
+    time1.setHours(0);
+    time1.setMinutes(0);
+    time1.setSeconds(0);
+    time1.setMilliseconds(0);
+    time1 = time1.getTime();
+
+    var time2 = new Date();
+    time2.setYear(year);
+    time2.setMonth(l_month - 1);
+    time2.setDate(l_day);
+    time2.setHours(0);
+    time2.setMinutes(0);
+    time2.setSeconds(0);
+    time2.setMilliseconds(0);
+    time2 = time2.getTime();
+
+    // console.log(`time1: ${year}-${month}-${day}`, time1);
+    // console.log(`time2: ${year}-${l_month}-${l_day}`, time2);
+    const interval = (time1 - time2) / 86400000;
     const t1 = year + "-" + month + "-" + day;
     const t2 = year + "-" + l_month + "-" + l_day;
-    // console.log(`${t2} ~ ${t1} 相差：${interval} days`);
+    console.log(`${t2} ~ ${t1} 相差：${interval} days`);
     return interval;
   },
   //根据距离正月初一的天数计算阴历日期
@@ -215,10 +238,10 @@ var Lunar = {
     }
 
     const intervalDays = this.betweenSolarDays(year, month, day, yearData[1], yearData[2]);
-    // console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
-    //   ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
-    //   offset: ${yearData[3]}
-    // `);
+    console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
+      ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
+      offset: ${yearData[3]}
+    `);
     return this.lunarByBetween(year, intervalDays);
   },
   //转换公历
