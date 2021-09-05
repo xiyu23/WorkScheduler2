@@ -1,4 +1,6 @@
-const __DEV__ = true;
+const {
+  __DEV__,
+} = require('./config');
 
 /**用法
  * Lunar.toSolar(2016, 6, 3); 农历转化公历

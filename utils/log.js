@@ -1,20 +1,23 @@
 const log = wx.getRealtimeLogManager ? wx.getRealtimeLogManager() : null
+const {
+  __DEV__,
+} = require('./config');
 
 module.exports = {
   info() {
-    console.info(...arguments);
+    __DEV__ && console.info(...arguments);
     if (!log) return
 
     log.info.apply(log, arguments)
   },
   warn() {
-    console.warn(...arguments);
+    __DEV__ && console.warn(...arguments);
     if (!log) return
 
     log.warn.apply(log, arguments)
   },
   error() {
-    console.error(...arguments);
+    __DEV__ && console.error(...arguments);
     if (!log) return
 
     log.error.apply(log, arguments)

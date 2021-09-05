@@ -1,13 +1,14 @@
 const logger = require('../../utils/log.js');
 const Lunar = require('../../utils/lunarConvert.js');
+const {
+  __DEV__,
+} = require('../../utils/config');
 
 //index.js
 //获取应用实例
 const app = getApp()
-const __DEV__ = true;
 
 //获取屏幕宽度
-let winWidth = wx.getSystemInfoSync().windowWidth;
 const PREV = 2;
 const NEXT = 12;
 const MAX_PERIODS = 12;
@@ -54,11 +55,23 @@ function ReadUserPeriodsSync() {
 }
 
 let DateWidth = 0;
+let DateHeight = 0;
 let DAYS_CHOOSEN = 1;
 let inputPeriodsObj = {};
 
-let SPECIAL_DATES = ['春节', '元宵节', '端午节', '中秋节', '重阳节', '除夕'];
 let MEANINGFUL_DATES = ['七夕']
+
+// 法定节假日
+const LawHolidays = [
+  '元旦',
+  '除夕',
+  '春节',
+  '清明节',
+  '劳动节',
+  '端午节',
+  '中秋节',
+  '国庆节',
+];
 
 function log(msg) {
   if (__DEV__) {
@@ -77,10 +90,12 @@ function RefreshConstants() {
 
 Page({
   data: {
+    __DEV__,
     userInfo: {},
 
     weeks: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-    dateWidth: DateWidth,//小方格的宽度
+    dateWidth: DateWidth, //小方格的宽度
+    dateHeight: DateHeight, //小方格的高度
     monthMetadata: [],
 
     //为标志今天css
@@ -95,14 +110,6 @@ Page({
     promptText: '',
     periodDays: PERIOD_DAYS,//picker view天数选择
     focusIndex: -1
-  },
-  //事件处理函数
-  bindViewTap: function () {
-    if (__DEV__) {
-      wx.navigateTo({
-        url: '../logs/logs'
-      })
-    }
   },
   //日历跳转至今天
   jumpToToday: function () {
@@ -309,9 +316,10 @@ function RefreshCalendar(that) {
   logger.info('query width...');
   wx.createSelectorQuery().select('.calendar').boundingClientRect(function (rect) {
     DateWidth = Math.floor(rect.width / 7);
-    logger.info(`query finished, 小方格的宽度是: ${DateWidth}`);
+    DateHeight = Math.floor(DateWidth / 0.93);
+    logger.info(`query finished, 小方格尺寸是: ${DateWidth} x ${DateHeight}`);
     logger.info(`start to init monthMetadata: ${JSON.stringify(that.data.monthMetadata)}`);
-    that.setData({ toView: CURRENT_MONTH_ID, dateWidth: DateWidth, todayNo: TODAY_NO });
+    that.setData({ toView: CURRENT_MONTH_ID, dateWidth: DateWidth, dateHeight: DateHeight, todayNo: TODAY_NO });
 
     //初始化calendar数据
     if (PERIODS.length < 1 || !(ANCHOR_DATE instanceof Date)) {
@@ -504,7 +512,10 @@ let dataGenerator = (function () {
         lunaryDay,
         festival,
       } = fullLunar;
-      const specialClass = -1 < SPECIAL_DATES.indexOf(festival) ? 'red' : (-1 < MEANINGFUL_DATES.indexOf(festival) ? 'purple' : '');
+      const lawHolidayCss = -1 < LawHolidays.indexOf(festival) && 'law-holiday' || '';
+      const meaningfulDayCss = -1 < MEANINGFUL_DATES.indexOf(festival) && 'meaningful' || '';
+
+      const specialClass = lawHolidayCss || meaningfulDayCss;
       monthStatusArr.push({
         date: (i - padBefore + 1),
         traDate: specialClass ? festival : lunaryDay,
