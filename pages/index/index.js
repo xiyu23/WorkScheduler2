@@ -583,6 +583,36 @@ let dataGenerator = (function () {
           expectLunarDay: '壬寅(虎)年 七月初七',
           festival: '七夕',
         },
+        {
+          solar: '2023-01-21',
+          expectLunarDay: '壬寅(虎)年 腊月三十',
+          festival: '除夕',
+        },
+        {
+          solar: '2023-01-22',
+          expectLunarDay: '癸卯(兔)年 正月初一',
+          festival: '春节',
+        },
+        {
+          solar: '2024-02-09',
+          expectLunarDay: '癸卯(兔)年 腊月三十',
+          festival: '除夕',
+        },
+        {
+          solar: '2024-02-10',
+          expectLunarDay: '甲辰(龙)年 正月初一',
+          festival: '春节',
+        },
+        {
+          solar: '2025-01-28',
+          expectLunarDay: '甲辰(龙)年 腊月廿九',
+          festival: '除夕',
+        },
+        {
+          solar: '2025-01-29',
+          expectLunarDay: '乙巳(蛇)年 正月初一',
+          festival: '春节',
+        },
       ];
 
       const total = solarDays.length;
@@ -613,7 +643,7 @@ let dataGenerator = (function () {
         if (!isFestivalCorrect) {
           logger.warn(`festival is wrong: ${expFestival} !== ${resFestival}`);
         }
-        logger.error(`case ${i}/${total} failed.
+        logger.error(`case ${i}/${total - 1} failed.
           solarDay: ${solar}
           expectedLunarDay: ${expectLunarDay} (got ${fullLunarDayString})
           expectedFestival: ${expFestival} (got ${resFestival})
