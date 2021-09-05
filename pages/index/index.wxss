@@ -121,6 +121,9 @@
   float: right;
   padding: 0px 10px;
 }
+.day-status-input {
+  font-size: 0.8rem;
+}
 .switcher{
   height:32px;
   margin: 24px 10px 10px;
