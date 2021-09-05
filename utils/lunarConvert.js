@@ -12,7 +12,7 @@ var Lunar = {
     [2, 1, 22, 19176], [0, 2, 10, 19168], [6, 1, 30, 42200], [0, 2, 18, 42192], [0, 2, 6, 53840], [5, 1, 26, 54568],
     [0, 2, 14, 46400], [0, 2, 3, 54944], [2, 1, 23, 38608], [0, 2, 11, 38320], [7, 2, 1, 18872], [0, 2, 20, 18800],
     [0, 2, 8, 42160], [5, 1, 28, 45656], [0, 2, 16, 27216], [0, 2, 5, 27968], [4, 1, 24, 44456], [0, 2, 13, 11104],
-    [0, 2, 2, 38256], [2, 1, 23, 18808], [0, 2, 10, 18800], [6, 1, 30, 25776], [0, 2, 17, 54432], [0, 2, 6, 59984],
+    [0, 2, 2, 38256], [2, 1, 27, 18808], [0, 2, 10, 18800], [6, 1, 30, 25776], [0, 2, 17, 54432], [0, 2, 6, 59984],
     [5, 1, 26, 27976], [0, 2, 14, 23248], [0, 2, 4, 11104], [3, 1, 24, 37744], [0, 2, 11, 37600], [7, 1, 31, 51560],
     [0, 2, 19, 51536], [0, 2, 8, 54432], [6, 1, 27, 55888], [0, 2, 15, 46416], [0, 2, 5, 22176], [4, 1, 25, 43736],
     [0, 2, 13, 9680], [0, 2, 2, 37584], [2, 1, 22, 51544], [0, 2, 10, 43344], [7, 1, 29, 46248], [0, 2, 17, 27808],
@@ -137,9 +137,13 @@ var Lunar = {
   //@param l_month 阴历正月对应的阳历月份
   //@param l_day   阴历初一对应的阳历天
   betweenSolarDays: function (year, month, day, l_month, l_day) {
-    var time1 = new Date(year + "-" + month + "-" + day).getTime(),
-      time2 = new Date(year + "-" + l_month + "-" + l_day).getTime();
-    return Math.ceil((time1 - time2) / 24 / 3600 / 1000);
+    var time1 = new Date(year + "-" + month + "-" + day + " 00:00:00").getTime(),
+      time2 = new Date(year + "-" + l_month + "-" + l_day + " 00:00:00").getTime();
+    const interval = Math.ceil((time1 - time2) / 86400000);
+    const t1 = year + "-" + month + "-" + day;
+    const t2 = year + "-" + l_month + "-" + l_day;
+    // console.log(`${t2} ~ ${t1} 相差：${interval} days`);
+    return interval;
   },
   //根据距离正月初一的天数计算阴历日期
   //@param year 阳历年
@@ -181,7 +185,7 @@ var Lunar = {
   },
   //中文月份
   chineseMonth: function (month) {
-    var monthHash = ['', '正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
+    var monthHash = ['', '正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月'];
     return monthHash[month];
   },
   //中文日期
@@ -207,7 +211,13 @@ var Lunar = {
     if (year == this.MIN_YEAR && month <= 2 && day <= 9) {
       return [1891, 1, 1, '辛卯', '兔', '正月', '初一'];
     }
-    return this.lunarByBetween(year, this.betweenSolarDays(year, month, day, yearData[1], yearData[2]));
+
+    const intervalDays = this.betweenSolarDays(year, month, day, yearData[1], yearData[2]);
+    // console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
+    //   ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
+    //   offset: ${yearData[3]}
+    // `);
+    return this.lunarByBetween(year, intervalDays);
   },
   //转换公历
   //@param year  阴历-年
@@ -242,7 +252,7 @@ var Lunar = {
     return {
       // 辛卯(兔)年 正月初一
       fullLunarDayString: `${lunarYear}(${lunarZodiac})年 ${lunarMon}${lunarDay}`,
-      lunaryDay: lunarDay === '初一' ? month : lunarDay,
+      lunaryDay: lunarDay === '初一' ? lunarMon : lunarDay,
       festival: Lunar.getFestival({
         solarDate: new Date(year, month - 1, day),
         lunarDate: {
@@ -263,6 +273,9 @@ var Lunar = {
       lunarMon: lunarMonth, // 八月
       lunarDay, // 初八
     } = lunarDate;
+    const year = solarDate.getFullYear();
+    const month = solarDate.getMonth() + 1;
+    const day = solarDate.getDate();
 
     let festival = '';
     if (lunarMonth == '正月') {
@@ -279,6 +292,23 @@ var Lunar = {
     }
     else if (lunarMonth == '腊月') {
       switch (lunarDay) {
+        case '廿九': {
+          // 如果明天是春节，那今天就是除夕
+          const tomorrow = new Date(year, month - 1, day + 1);
+          const ty = tomorrow.getFullYear();
+          const tm = tomorrow.getMonth() + 1;
+          const td = tomorrow.getDate();
+          const {
+            // fullLunarDayString,
+            lunaryDay,
+          } = Lunar.toFullLunar(ty, tm, td);
+          // console.warn(`今天是腊月二十九，明天${ty}-${tm}-${td}对应农历：${fullLunarDayString}`);
+          if (lunaryDay === '正月') {
+            console.warn(`${year}-${month}-${day}(农历腊月廿九)是除夕，因为明天就是春节`);
+            festival = '除夕';
+          }
+          break;
+        }
         case '三十': {
           festival = '除夕';
           break;
@@ -320,6 +350,28 @@ var Lunar = {
       }
     }
 
+    // 农历不是节日，那看看阳历是否为节日
+    if (!festival) {
+      if (month === 1) {
+        switch (day) {
+          case 1:
+            festival = '元旦';
+            break;
+        }
+      } else if (month === 5) {
+        switch (day) {
+          case 1:
+            festival = '劳动节';
+            break;
+        }
+      } else if (month === 4) {
+        switch (day) {
+          case 5:
+            festival = '清明节';
+            break;
+        }
+      }
+    }
     return festival;
   },
 };

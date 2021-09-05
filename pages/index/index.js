@@ -438,6 +438,7 @@ let dataGenerator = (function () {
         {
           solar: '1990-10-26',
           expectLunarDay: '庚午(马)年 九月初九',
+          festival: '重阳节',
         },
         {
           solar: '1990-11-26',
@@ -450,6 +451,7 @@ let dataGenerator = (function () {
         {
           solar: '2019-05-01',
           expectLunarDay: '己亥(猪)年 三月廿七',
+          festival: '劳动节',
         },
         {
           solar: '2019-05-04',
@@ -535,7 +537,7 @@ let dataGenerator = (function () {
         },
         {
           solar: '2021-09-21',
-          expectLunarDay: '辛丑(牛)年 五月初五',
+          expectLunarDay: '辛丑(牛)年 八月十五',
           festival: '中秋节',
         },
         {
@@ -549,6 +551,7 @@ let dataGenerator = (function () {
         {
           solar: '2022-01-01',
           expectLunarDay: '辛丑(牛)年 十一月廿九',
+          festival: '元旦',
         },
         {
           solar: '2022-01-31',
