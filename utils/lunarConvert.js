@@ -238,10 +238,10 @@ var Lunar = {
     }
 
     const intervalDays = this.betweenSolarDays(year, month, day, yearData[1], yearData[2]);
-    console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
-      ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
-      offset: ${yearData[3]}
-    `);
+    // console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
+    //   ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
+    //   offset: ${yearData[3]}
+    // `);
     return this.lunarByBetween(year, intervalDays);
   },
   //转换公历
