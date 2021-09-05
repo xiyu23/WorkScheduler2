@@ -165,9 +165,9 @@ var Lunar = {
     // console.log(`time1: ${year}-${month}-${day}`, time1);
     // console.log(`time2: ${year}-${l_month}-${l_day}`, time2);
     const interval = (time1 - time2) / 86400000;
-    const t1 = year + "-" + month + "-" + day;
-    const t2 = year + "-" + l_month + "-" + l_day;
-    console.log(`${t2} ~ ${t1} 相差：${interval} days`);
+    // const t1 = year + "-" + month + "-" + day;
+    // const t2 = year + "-" + l_month + "-" + l_day;
+    // console.log(`${t2} ~ ${t1} 相差：${interval} days`);
     return interval;
   },
   //根据距离正月初一的天数计算阴历日期
