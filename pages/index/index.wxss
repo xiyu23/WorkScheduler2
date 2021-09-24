@@ -101,7 +101,7 @@
   clear:both;
 }
 .calendar{
-  padding: 0rpx 5rpx;
+  padding: 0px;
 }
 .calendar-body{
   height: 900rpx;
@@ -159,6 +159,7 @@
 }
 .jump-today{
   color:orange;
-  margin-left: 5px;
+  margin-left: 10px;
+  margin-bottom: 4px;
   font-weight: bold;
 }

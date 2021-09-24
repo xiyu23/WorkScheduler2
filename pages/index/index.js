@@ -10,7 +10,7 @@ const app = getApp()
 
 //获取屏幕宽度
 const PREV = 2;
-const NEXT = 12;
+const NEXT = 24;
 const MAX_PERIODS = 12;
 let NOW;
 let PREV_MOST_DATE;
