@@ -144,25 +144,8 @@ var Lunar = {
     // var time1 = new Date(year + "-" + month + "-" + day + " 00:00:00").getTime(),
     //   time2 = new Date(year + "-" + l_month + "-" + l_day + " 00:00:00").getTime();
     // stupid mp !!!
-    var time1 = new Date();
-    time1.setYear(year);
-    time1.setMonth(month - 1);
-    time1.setDate(day);
-    time1.setHours(0);
-    time1.setMinutes(0);
-    time1.setSeconds(0);
-    time1.setMilliseconds(0);
-    time1 = time1.getTime();
-
-    var time2 = new Date();
-    time2.setYear(year);
-    time2.setMonth(l_month - 1);
-    time2.setDate(l_day);
-    time2.setHours(0);
-    time2.setMinutes(0);
-    time2.setSeconds(0);
-    time2.setMilliseconds(0);
-    time2 = time2.getTime();
+    const time1 = Date.parse(`${year}-${month}-${day} 00:00:00`);
+    const time2 = Date.parse(`${year}-${l_month}-${l_day} 00:00:00`);
 
     // console.log(`time1: ${year}-${month}-${day}`, time1);
     // console.log(`time2: ${year}-${l_month}-${l_day}`, time2);
@@ -240,7 +223,7 @@ var Lunar = {
     }
 
     const intervalDays = this.betweenSolarDays(year, month, day, yearData[1], yearData[2]);
-    // console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
+    // __DEV__ && console.log(`阳历${year}-${month}-${day}距离基准正月初一的天数：${intervalDays} days
     //   ${year}年(index=${year - this.MIN_YEAR})的正月初一对应的阳历日子：${yearData[1]}-${yearData[2]}
     //   offset: ${yearData[3]}
     // `);
@@ -294,6 +277,8 @@ var Lunar = {
       lunarMon,
       lunarDay,
     ] = arr;
+
+    // __DEV__ && console.log(`covert ${year}-${month}-${day} to ${lunarYear}-${lunarMon}-${lunarDay}`);
 
     return {
       // 辛卯(兔)年 正月初一
