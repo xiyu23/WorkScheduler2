@@ -134,6 +134,15 @@ var Lunar = {
     res += day - 1;
     return res;
   },
+  convertDate(year, month, day) {
+    // sb miniprogram
+    const date = new Date(Date.parse(`${year}/${month}/${day}`));
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return date;
+  },
   //计算2个阳历日期之间的天数
   //@param year 阳历年
   //@param month
@@ -144,8 +153,11 @@ var Lunar = {
     // var time1 = new Date(year + "-" + month + "-" + day + " 00:00:00").getTime(),
     //   time2 = new Date(year + "-" + l_month + "-" + l_day + " 00:00:00").getTime();
     // stupid mp !!!
-    const time1 = Date.parse(`${year}-${month}-${day} 00:00:00`);
-    const time2 = Date.parse(`${year}-${l_month}-${l_day} 00:00:00`);
+    // let time1 = Date.parse(`${year}-${month}-${day}`); // 为啥对于2021-11-11，parse出来的时间是8点？
+    // let time2 = Date.parse(`${year}-${l_month}-${l_day}`);
+
+    const time1 = +this.convertDate(year, month, day);
+    const time2 = +this.convertDate(year, l_month, l_day);
 
     // console.log(`time1: ${year}-${month}-${day}`, time1);
     // console.log(`time2: ${year}-${l_month}-${l_day}`, time2);
